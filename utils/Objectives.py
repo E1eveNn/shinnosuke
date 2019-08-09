@@ -70,7 +70,7 @@ class SparseCategoricalCrossEntropy(Objective):
     def calc_loss(self,y_hat,y):
         avg=np.prod(np.asarray(y_hat.shape[:-1]))
         loss=-np.sum(np.multiply(y,np.log(y_hat)))/avg
-        return loss.tolist()
+        return loss
 
 
 
@@ -88,14 +88,26 @@ class SparseCategoricalCrossEntropy(Objective):
 
 class CategoricalCrossEntropy(Objective):
     def calc_acc(self,y_hat,y):
-        acc = (np.argmax(y_hat, axis=-1,keepdims=True) == y)
+        acc = (np.argmax(y_hat, axis=-1) == y)
         acc = np.mean(acc).tolist()
         return acc
 
-    def calc_loss(self,y_hat,y):
-        raise NotImplemented
-        # to_sum_shape=np.asarray(y_hat.shape[:-1])
-        # avg=np.prod(to_sum_shape)
+
+    def calc_loss(self,y_hat,y_true):
+        to_sum_shape = np.asarray(y_hat.shape[:-1])
+        avg = np.prod(to_sum_shape)
+        loss=0
+        if y_hat.ndim==2:
+            for m in range(y_hat.shape[0]):
+                loss-=np.log(y_hat[m,y_true[m]])
+        elif y_hat.ndim==3:
+            for m in range(y_hat.shape[0]):
+                for n in range(y_hat.shape[1]):
+                    loss-=np.log(y_hat[m,n,y_true[m,n]])
+        loss/=avg
+        return loss
+
+
         # idx=[]
         # for s in to_sum_shape:
         #     idx.append(np.arange(s).tolist())
@@ -118,7 +130,18 @@ class CategoricalCrossEntropy(Objective):
         #
         # y_hat[idx]-=1
         # return y_hat/avg
-        raise NotImplemented
+        to_sum_shape = np.asarray(y_hat.shape[:-1])
+        avg = np.prod(to_sum_shape)
+        output = y_hat
+        if y_hat.ndim == 2:
+            for m in y_hat.shape[0]:
+                output[m,y_true[m]]-=1
+        elif y_hat.ndim == 3:
+            for m in range(y_hat.shape[0]):
+                for n in range(y_hat.shape[1]):
+                   output[m,n,y_true[m,n]] -= 1
+        output/=avg
+        return output
 
 
 
