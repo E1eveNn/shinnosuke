@@ -1,6 +1,6 @@
 # Shinnosuke : Deep Learning Framework
 
-<div align=center>![Shinnosuke](https://gss1.bdstatic.com/9vo3dSag_xI4khGkpoWK1HF6hhy/baike/w%3D268%3Bg%3D0/sign=625eaa79a864034f0fcdc50097f81e0c/8c1001e93901213f91ab2a7857e736d12e2e95fd.jpg)
+  ![Shinnosuke](https://gss1.bdstatic.com/9vo3dSag_xI4khGkpoWK1HF6hhy/baike/w%3D268%3Bg%3D0/sign=625eaa79a864034f0fcdc50097f81e0c/8c1001e93901213f91ab2a7857e736d12e2e95fd.jpg)
 
 
 
@@ -78,7 +78,7 @@ m.fit(trainX, trainy, batch_size=128, epochs=5, validation_data=(validX,validy),
 
 If `draw_acc_loss`=**True**, a dynamic updating figure will be shown in the training process, like below:
 
-![draw_acc_loss](C:%5CUsers%5CAdministrator%5CDesktop%5Cdraw_acc.png)
+![draw_acc_loss](https://github.com/eLeVeNnN/shinnosuke/blob/master/docs/imgs/draw_acc.png)
 
 
 
