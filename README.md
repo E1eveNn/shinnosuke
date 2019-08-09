@@ -6,6 +6,7 @@
 
 
 
+
 ## Descriptions
 
 Shinnosuke is a high-level neural network's API that almost identity to Keras with slightly differences. It was written by Python only, and dedicated to realize experimentations quickly.
@@ -78,8 +79,10 @@ m.fit(trainX, trainy, batch_size=128, epochs=5, validation_data=(validX,validy),
 
 If `draw_acc_loss`=**True**, a dynamic updating figure will be shown in the training process, like below:
 
-![draw_acc_loss](https://github.com/eLeVeNnN/shinnosuke/blob/master/docs/imgs/draw_acc.png)
 
+<div align=center>
+	<img src="https://github.com/eLeVeNnN/shinnosuke/blob/master/docs/imgs/draw_acc.png" width="">
+</div>
 
 
 Evaluate your model performance by `.evaluate()`:
