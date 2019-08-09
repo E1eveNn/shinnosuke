@@ -20,12 +20,14 @@ class Node(object):
 
         self.output_tensor=output_tensor
         #current node's name
-        self.shape=shape
+        self.output_shape=shape
 
         self.require_grads=True
         #store the grads from next layer
 
-        self.grads=None
+        self.grads=0
+
+        self.op=None
 
         self.name=name
 
@@ -39,29 +41,72 @@ class Node(object):
         pass
 
 
+
     def __add__(self, other):
-        return add(self, other)
+        outputs = add(self, other)
+        self.outbound_layers.append(outputs)
+        other.outbound_layers.append(outputs)
+        outputs.inbound_layers.extend([self,other])
+        outputs.op=Add
+        return outputs
+
 
 
     def __sub__(self, other):
-        return subtract(self,other)
+        outputs = subtract(self,other)
+        self.outbound_layers.append(outputs)
+        other.outbound_layers.append(outputs)
+        outputs.inbound_layers.extend([self, other])
+        return outputs
 
 
     def __matmul__(self, other):
-        return matmul(self, other)
+        outputs = matmul(self, other)
+        self.outbound_layers.append(outputs)
+        other.outbound_layers.append(outputs)
+        outputs.inbound_layers.extend([self,other])
+        return outputs
 
 
     def __mul__(self, other):
-        return multiply(self, other)
+        outputs = multiply(self, other)
+        self.outbound_layers.append(outputs)
+        other.outbound_layers.append(outputs)
+        outputs.inbound_layers.extend([self,other])
+        outputs.op=Multiply
+        return outputs
+
+
+    def __truediv__(self, other):
+        outputs = truediv(self, other)
+        self.outbound_layers.append(outputs)
+        other.outbound_layers.append(outputs)
+        outputs.inbound_layers.extend([self, other])
+        return outputs
+
+
 
 
     def __neg__(self):
-        return negative(self)
+        outputs = negative(self)
+        self.outbound_layers.append(outputs)
+        outputs.inbound_layers.append(self)
+        return outputs
 
 
-    # @property
-    # def value(self):
-    #     return self.output_tensor
+    @property
+    def get_value(self):
+        return self.output_tensor
+
+
+
+    def grad(self):
+        if not self.outbound_layers:
+            self.grads=1
+            return self.grads
+        
+
+
 
 
 
@@ -82,13 +127,11 @@ class Variable(Node):
             self.output_tensor=initial_output_tensor
         else:
             self.output_tensor=np.array(initial_output_tensor)
-            self.shape=self.output_tensor.shape
+            self.output_shape=self.output_tensor.shape
         self.name=name
 
 
-    @property
-    def get_value(self):
-        return self.output_tensor
+
 
 #for nodes
 def add(a,b,outputs=None):
@@ -132,6 +175,22 @@ def matmul(a, b, outputs=None):
     else:
         outputs.output_tensor = np.dot(a.output_tensor, b.output_tensor)
         return outputs
+
+
+
+
+
+def truediv(a,b,outputs=None):
+    if outputs is None:
+        return Variable(initial_output_tensor=a.output_tensor / b.output_tensor)
+    else:
+        outputs.output_tensor = a.output_tensor / b.output_tensor
+        return outputs
+
+
+
+
+
 
 
 
@@ -330,6 +389,14 @@ class Add(Operation):
         y.grads+=grad_y
 
 
+    @staticmethod
+    def _backward(grads,x,y):
+        x.grads=grads
+        y.grads=grads
+
+
+
+
 
 
 
@@ -393,10 +460,14 @@ class Multiply(Operation):
         y.grads += grad_y
 
 
+    @staticmethod
+    def _backward(grads,x,y):
+        x.grads=grads*y.output_tensor
+        y.grads=grads*x.output_tensor
+
+
 
 class Matmul(Operation):
-
-
 
 
     def forward(self,is_training=True):
@@ -423,8 +494,6 @@ class Matmul(Operation):
 
 
 class Log(Operation):
-
-
 
     def forward(self,is_training=True):
         x,=self.variables
@@ -463,9 +532,8 @@ class Exp(Operation):
 
 
 
+
 class Reciprocal(Operation):
-
-
 
 
     def forward(self,is_training=True):
@@ -484,5 +552,13 @@ class Reciprocal(Operation):
 
 
 
+
+a=Variable(3)
+b=Variable(5)
+c=Variable(4)
+d=Variable(6)
+e=a*b+c*d
+e.grad()
+print(e.grads)
 
 
