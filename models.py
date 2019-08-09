@@ -62,7 +62,7 @@ class Sequential():
         for epoch in range(epochs):
             mini_batches=get_batches(train_X,train_Y,batch_size,epoch,shuffle)
             batch_nums=len(mini_batches)
-            training_size=batch_nums*batch_size
+            training_size=train_X.shape[0]
             batch_count=0
             print('\033[0;31m Epoch[%d/%d]' % (epoch + 1, epochs))
             start_time = time.time()
@@ -80,6 +80,9 @@ class Sequential():
                 for layer in reversed(self.layers):
                     layer.backward()
 
+                end_time = time.time()
+                gap = end_time - start_time
+
                 self.optimizer.update(self.trainable_variables)
 
                 batch_acc, batch_loss = self.__evaluate(y_hat, ys)
@@ -92,8 +95,7 @@ class Sequential():
                     self.valid_acc.append(valid_acc)
 
 
-                end_time = time.time()
-                gap = end_time - start_time
+
                 if draw_acc_loss:
                     if len(self.train_loss)==2:
                         plt.ion()
@@ -333,7 +335,7 @@ class Model():
         for epoch in range(epochs):
             mini_batches = get_batches(train_X, train_Y, batch_size, epoch, shuffle)
             batch_nums = len(mini_batches)
-            training_size = batch_nums * batch_size
+            training_size = train_X.shape[0]
             batch_count = 0
             print('\033[0;31m Epoch[%d/%d]' % (epoch + 1, epochs))
             start_time = time.time()
@@ -345,6 +347,9 @@ class Model():
 
                 #backward
                 self.calc_gradients(y_hat,ys)
+
+                end_time = time.time()
+                gap = end_time - start_time
                 self.optimizer.update(self.trainable_variables)
 
                 batch_acc, batch_loss = self.__evaluate(y_hat, ys)
@@ -355,8 +360,7 @@ class Model():
                     valid_acc, valid_loss = self.evaluate(valid_X, valid_Y)
                     self.valid_loss.append(valid_loss)
                     self.valid_acc.append(valid_acc)
-                end_time = time.time()
-                gap = end_time - start_time
+
                 if draw_acc_loss:
                     if len(self.train_loss) == 2:
                         plt.ion()
