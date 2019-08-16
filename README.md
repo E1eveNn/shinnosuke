@@ -9,7 +9,7 @@
 
 ## Descriptions
 
-Shinnosuke is a high-level neural network's API that almost identity to Keras with slightly differences. It was written by Python only, and dedicated to realize experimentations quickly.
+Shinnosuke is a high-level neural network which API almost identity to Keras with slightly differences. It was written by Python only, and dedicated to realize experimentations quickly.
 
 Here are some features of Shinnosuke:
 
@@ -17,9 +17,8 @@ Here are some features of Shinnosuke:
 2. Without any other 3rd-party library.
 3. **Keras-like API**, several basic AI Examples are provided, easy to get start.
 4. Support commonly used models such as: Dense, Conv2D, MaxPooling2D, LSTM, SimpleRNN, etc.
-5. Several basic AI Examples are provided.
-6. **Sequential** model (for most  sequence network combinations ) and **Functional** model (for resnet, etc) are implemented.
-7. Training is conducted on forward graph and backward graph, meanwhile **autograd** is supported .
+5. **Sequential** model (for most  sequence network combinations ) and **Functional** model (for resnet, etc) are implemented.
+6. Training is conducted on forward graph and backward graph, meanwhile **autograd** is supported .
 
 Shinnosuke is compatible with: **Python 3.x (3.6 is recommended)**
 
@@ -133,7 +132,7 @@ Pass inputs and outputs layer to `Model()`, and then compile and fit model like 
 
 Building an image classification model, a question answering system or any other model is just as convenient and fast~
 
-In the [Examples folder](https://github.com/eLeVeNnN/shinnosuke/Examples) of this repository, you can find more advanced models.(waiting to implement..)
+In the [Examples folder](https://github.com/eLeVeNnN/shinnosuke/Examples/) of this repository, you can find more advanced models.(waiting to implement..)
 
 ------
 
