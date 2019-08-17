@@ -149,14 +149,14 @@ class Conv2D(Layer):
     def backward(self):
         W,b=self.variables
         grads=self.activator._backward(self.grads)
-        filter_nums,n_C,filter_h,filter_w=W.shape
+        filter_nums,n_C,filter_h,filter_w=W.output_shape
         grads=grads.transpose(0,2,3,1).reshape(-1,filter_nums)
         if W.require_grads:
             dW = self.col.T.dot(grads)
             W.grads += dW.transpose(1, 0).reshape(filter_nums, n_C, filter_h, filter_w)
         if b.require_grads:
             b.grads += np.sum(grads,axis=0)
-        for layer in self.inbound_layers:
+        for layer in self.inbounds:
             if layer.require_grads:
                 dcol = grads.dot(self.col_W.T)
 
@@ -208,7 +208,7 @@ class ZeroPadding2D(Layer):
 
 
     def backward(self):
-        for layer in self.inbound_layers:
+        for layer in self.inbounds:
             if layer.require_grads:
                 layer.grads+=self.grads[:,:,self.pad_h:-self.pad_h,self.pad_w:-self.pad_w]
             else:
@@ -276,9 +276,9 @@ class MaxPooling2D(Layer):
         dmax[np.arange(self.argmax_index.size), self.argmax_index.flatten()] = grads.flatten()
         dmax = dmax.reshape(grads.shape + (pool_h*pool_w,))
 
-        dcol = dmax.reshape(dmax.shape[0] * dmax.shape[1] * dmax.shape[2], -1)
+        dcol = dmax.reshape(np.prod(dmax.shape[:3]), -1)
         outputs = col2im(self.inputs_shape,(0,0),self.pool_size, self.stride, dcol)
-        for layer in self.inbound_layers:
+        for layer in self.inbounds:
             if layer.require_grads:
                 layer.grads += outputs
             else:
@@ -349,10 +349,10 @@ class MeanPooling2D(Layer):
         dmean=np.repeat(grads.flatten(),self.argmean_index.size)/(pool_w*pool_h)
         dmean = dmean.reshape(grads.shape + (pool_h*pool_w,))
 
-        dcol = dmean.reshape(dmean.shape[0] * dmean.shape[1] * dmean.shape[2], -1)
+        dcol = dmean.reshape(np.prod(dmean.shape[:3]), -1)
         outputs = col2im(self.inputs_shape,(0,0),self.pool_size, self.stride, dcol)
 
-        for layer in self.inbound_layers:
+        for layer in self.inbounds:
             if layer.require_grads:
                 layer.grads += outputs
             else:

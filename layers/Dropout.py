@@ -38,7 +38,7 @@ class Dropout(Layer):
 
 
     def backward(self):
-        for layer in self.inbound_layers:
+        for layer in self.inbounds:
             if layer.require_grads:
                 layer.grads+=(self.grads*self.mask/self.keep_prob)
             else:

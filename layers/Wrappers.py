@@ -51,7 +51,7 @@ class TimeDistributed(Layer):
             self.layer.input_tensor=self.input_tensor[:,t,:]
             self.layer.grads=self.grads[:,t,:]
             self.layer.backward()
-            for layer in self.inbound_layers:
+            for layer in self.inbounds:
                 if layer.require_grads:
                     layer.grads[:,t,:] += self.layer.timedist_grads
                 else:

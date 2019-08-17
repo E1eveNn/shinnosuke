@@ -160,7 +160,7 @@ class SimpleRNN(Recurrent):
         if self.return_sequences:
             self.output_shape=(batch_nums,timesteps,self.cell.units)
         else:
-            self.output_shape=(batch_nums,1,self.cell.units)
+            self.output_shape=(batch_nums,self.cell.units)
         self.variables=self.cell._initial_params(n_vec,self.cell.units)
 
         super(SimpleRNN,self).__call__(prev_layer)
@@ -204,7 +204,7 @@ class SimpleRNN(Recurrent):
 
     def backward(self):
         grad = self.cell._backward(self.grads, self.variables,self.return_sequences)
-        for layer in self.inbound_layers:
+        for layer in self.inbounds:
             if layer.require_grads:
                 layer.grads+=grad
             else:
@@ -226,7 +226,7 @@ class LSTMCell(Layer):
         self.__first_initialize = True
 
 
-    def _initial_params(self, n_in, n_out,timesteps):
+    def _initial_params(self, n_in, n_out):
         #Wf_l means forget gate linear weight,Wf_r represents forget gate recurrent weight.
         variables = []
         #forget gate
@@ -438,9 +438,9 @@ class LSTM(Recurrent):
         if self.return_sequences:
             self.output_shape = (batch_nums, timesteps, self.cell.units)
         else:
-            self.output_shape = (batch_nums, 1, self.cell.units)
+            self.output_shape = (batch_nums, self.cell.units)
 
-        self.variables = self.cell._initial_params(n_vec, self.cell.units,timesteps)
+        self.variables = self.cell._initial_params(n_vec, self.cell.units)
 
 
         super(LSTM, self).__call__(prev_layer)
@@ -480,7 +480,7 @@ class LSTM(Recurrent):
 
     def backward(self):
         grad = self.cell._backward(self.grads, self.variables, self.return_sequences)
-        for layer in self.inbound_layers:
+        for layer in self.inbounds:
             if layer.require_grads:
                 layer.grads += grad
             else:
@@ -502,7 +502,7 @@ class GRUCell(Layer):
         self.__first_initialize = True
 
 
-    def _initial_params(self, n_in, n_out,timesteps):
+    def _initial_params(self, n_in, n_out):
         #Wf_l means forget gate linear weight,Wf_r represents forget gate recurrent weight.
         variables = []
 
@@ -619,9 +619,9 @@ class GRU(Recurrent):
         if self.return_sequences:
             self.output_shape = (batch_nums, timesteps, self.cell.units)
         else:
-            self.output_shape = (batch_nums, 1, self.cell.units)
+            self.output_shape = (batch_nums, self.cell.units)
 
-        self.variables = self.cell._initial_params(n_vec, self.cell.units,timesteps)
+        self.variables = self.cell._initial_params(n_vec, self.cell.units)
 
 
         super(GRU, self).__call__(prev_layer)
@@ -661,7 +661,7 @@ class GRU(Recurrent):
 
     def backward(self):
         grad = self.cell._backward(self.grads, self.variables, self.return_sequences)
-        for layer in self.inbound_layers:
+        for layer in self.inbounds:
             if layer.require_grads:
                 layer.grads += grad
             else:
