@@ -130,7 +130,7 @@ Pass inputs and outputs layer to `Model()`, and then compile and fit model like 
 
 Building an image classification model, a question answering system or any other model is just as convenient and fast~
 
-In the [Examples folder](https://github.com/eLeVeNnN/shinnosuke/Examples/) of this repository, you can find more advanced models.(waiting to implement..)
+In the [Examples folder](https://github.com/eLeVeNnN/shinnosuke/Examples/) of this repository, you can find more advanced models.
 
 ------
 
@@ -228,7 +228,7 @@ print(c.grads)
 
 Guess what? out1 has the same value of out2, and so did W and c's grads. This is the magic autograd of shinnosuke. **By using this feature, users can implement other networks as wishes without writing any backward codes.**
 
-See autograd example in [Here!]()
+See autograd example in [Here!](https://github.com/eLeVeNnN/shinnosuke-gpu/blob/master/Examples/autograd.ipynb)
 
 ## Installation
 
