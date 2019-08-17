@@ -160,23 +160,23 @@ def get_initializer(initializer):
             return Zeros()
         elif initializer=='ones':
             return Ones()
-        elif initializer=='heuniform':
+        elif initializer in ['heuniform','he_uniform']:
             return HeUniform()
         elif initializer=='uniform':
             return Uniform()
         elif initializer=='normal':
             return Normal()
-        elif initializer=='henormal':
+        elif initializer in ['henormal','he_normal']:
             return HeNormal()
-        elif initializer=='lecunnormal':
+        elif initializer in ['lecunnormal','lecun_normal']:
             return LecunNormal()
-        elif initializer=='lecununiform':
+        elif initializer in ['lecununiform','lecun_uniform']:
             return LecunUniform()
         elif initializer=='orthogonal':
             return Orthogonal()
-        elif initializer=='glorotnoraml':
+        elif initializer in ['glorotnoraml','glorot_normal']:
             return GlorotNormal()
-        elif initializer=='glorotuniform':
+        elif initializer in ['glorotuniform','glorot_uniform']:
             return GlorotUniform()
 
     elif isinstance(initializer, Initializer):

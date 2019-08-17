@@ -27,7 +27,7 @@ class Sequential():
 
 
 
-    def compile(self,optimizer,loss,learning_rate=0.1,lr_decay=0.,beta1=0.9,beta2=0.999,epsilon=1e-8):
+    def compile(self,optimizer,loss):
         assert self.layers
         trainable_variables=[]
         # self.layers[0].first_layer=True
@@ -40,7 +40,7 @@ class Sequential():
                     trainable_variables.append(var)
         self.trainable_variables=trainable_variables
         self.loss=get_objective(loss)
-        self.optimizer=get_optimizer(optimizer,lr=learning_rate,decay=lr_decay,beta1=beta1,beta2=beta2,epsilon=epsilon)
+        self.optimizer=get_optimizer(optimizer)
 
 
 
@@ -64,11 +64,13 @@ class Sequential():
             batch_nums=len(mini_batches)
             training_size=train_X.shape[0]
             batch_count=0
+            trained_nums=0
             print('\033[0;31m Epoch[%d/%d]' % (epoch + 1, epochs))
             start_time = time.time()
             for xs,ys in mini_batches:
 
                 batch_count+=1
+                trained_nums+=xs.shape[0]
                 #forward
                 y_hat=self.predict(xs)
 
@@ -90,7 +92,7 @@ class Sequential():
                 self.train_loss.append(batch_loss)
                 self.train_acc.append(batch_acc)
                 if validation_data is not None:
-                    valid_acc, valid_loss = self.evaluate(valid_X, valid_Y)
+                    valid_acc, valid_loss = self.evaluate(valid_X, valid_Y,batch_size=batch_size)
                     self.valid_loss.append(valid_loss)
                     self.valid_acc.append(valid_acc)
 
@@ -107,13 +109,13 @@ class Sequential():
                         self.draw_training(ax1,ax2,draw_save_path,epoch)
 
 
-                trained_nums=batch_count*self.process_bar_nums//batch_nums
-                process_bar=self.process_bar_trained*trained_nums+'>'+self.process_bar_untrain*(self.process_bar_nums-trained_nums-1)
+                trained_process_bar_nums=batch_count*self.process_bar_nums//batch_nums
+                process_bar=self.process_bar_trained*trained_process_bar_nums+'>'+self.process_bar_untrain*(self.process_bar_nums-trained_process_bar_nums-1)
                 if validation_data is not None:
                     print(
-                        '\r{:d}/{:d} [{}] -{:.0f}s -{:.0f}ms/batch -batch_loss: {:.4f} -batch_acc: {:.4f} -val_loss: {:.4f} -val_acc: {:.4f}'.format(batch_count * batch_size, training_size, process_bar, gap, gap / batch_count,batch_loss, batch_acc, valid_loss, valid_acc), end='')
+                        '\r{:d}/{:d} [{}] -{:.0f}s -{:.0f}ms/batch -batch_loss: {:.4f} -batch_acc: {:.4f} -val_loss: {:.4f} -val_acc: {:.4f}'.format(trained_nums, training_size, process_bar, gap, gap*1000 / batch_count,batch_loss, batch_acc, valid_loss, valid_acc), end='')
                 else:
-                    print('\r{:d}/{:d} [{}] -{:.0f}s -{:.0f}ms/batch -batch_loss: {:.4f} -batch_acc: {:.4f} '.format( batch_count * batch_size, training_size, process_bar, gap, gap * 1000 / batch_count,batch_loss, batch_acc), end='')
+                    print('\r{:d}/{:d} [{}] -{:.0f}s -{:.0f}ms/batch -batch_loss: {:.4f} -batch_acc: {:.4f} '.format( trained_nums, training_size, process_bar, gap, gap * 1000 / batch_count,batch_loss, batch_acc), end='')
             print()
 
 
@@ -283,7 +285,7 @@ class Model():
                 n = layers.pop(0)
                 if n not in G:
                     G[n] = {'in': set(), 'out': set()}
-                for m in n.inbound_layers:
+                for m in n.inbounds:
                     if m not in G:
                         G[m] = {'in': set(), 'out': set()}
                     G[n]['out'].add(m)
@@ -295,7 +297,7 @@ class Model():
                 n = S.pop()
 
                 graph.append(n)
-                for m in n.inbound_layers:
+                for m in n.inbounds:
                     G[n]['out'].remove(m)
                     G[m]['in'].remove(n)
                     # if no other incoming edges add to S
@@ -307,14 +309,14 @@ class Model():
 
 
 
-    def compile(self, optimizer, loss, learning_rate=0.1, lr_decay=0., beta1=0.9, beta2=0.999, epsilon=1e-8):
+    def compile(self, optimizer, loss):
         assert self.inputs is not None and self.outputs is not None
 
         self.forwrad_graph,self.trainable_variables=self.topological_sort(self.inputs,mode='forward')
         self.backward_graph=self.topological_sort(self.outputs,mode='backward')
 
         self.loss = get_objective(loss)
-        self.optimizer = get_optimizer(optimizer, lr=learning_rate, decay=lr_decay, beta1=beta1, beta2=beta2,epsilon=epsilon)
+        self.optimizer = get_optimizer(optimizer)
 
 
 
@@ -337,11 +339,12 @@ class Model():
             batch_nums = len(mini_batches)
             training_size = train_X.shape[0]
             batch_count = 0
+            trained_nums=0
             print('\033[0;31m Epoch[%d/%d]' % (epoch + 1, epochs))
             start_time = time.time()
             for xs, ys in mini_batches:
                 batch_count += 1
-
+                trained_nums+=xs.shape[0]
                 # forward
                 y_hat = self.predict(xs)
 
@@ -350,6 +353,7 @@ class Model():
 
                 end_time = time.time()
                 gap = end_time - start_time
+
                 self.optimizer.update(self.trainable_variables)
 
                 batch_acc, batch_loss = self.__evaluate(y_hat, ys)
@@ -357,7 +361,7 @@ class Model():
                 self.train_loss.append(batch_loss)
                 self.train_acc.append(batch_acc)
                 if validation_data is not None:
-                    valid_acc, valid_loss = self.evaluate(valid_X, valid_Y)
+                    valid_acc, valid_loss = self.evaluate(valid_X, valid_Y,batch_size=batch_size)
                     self.valid_loss.append(valid_loss)
                     self.valid_acc.append(valid_acc)
 
@@ -371,13 +375,12 @@ class Model():
                     if len(self.train_loss) > 1:
                         self.draw_training(ax1, ax2, draw_save_path, epoch)
 
-                trained_nums = batch_count * self.process_bar_nums // batch_nums
-                process_bar = self.process_bar_trained * trained_nums + '>' + self.process_bar_untrain * (
-                            self.process_bar_nums - trained_nums - 1)
+                trained_process_bar_nums = batch_count * self.process_bar_nums // batch_nums
+                process_bar = self.process_bar_trained * trained_process_bar_nums + '>' + self.process_bar_untrain * ( self.process_bar_nums - trained_process_bar_nums - 1)
                 if validation_data is not None:
-                    print( '\r{:d}/{:d} [{}] -{:.0f}s -{:.0f}ms/batch -batch_loss: {:.4f} -batch_acc: {:.4f} -val_loss: {:.4f} -val_acc: {:.4f}'.format(batch_count*batch_size,training_size,process_bar, gap, gap/batch_count,batch_loss, batch_acc, valid_loss, valid_acc), end='')
+                    print( '\r{:d}/{:d} [{}] -{:.0f}s -{:.0f}ms/batch -batch_loss: {:.4f} -batch_acc: {:.4f} -val_loss: {:.4f} -val_acc: {:.4f}'.format(trained_nums,training_size,process_bar, gap, gap*1000/batch_count,batch_loss, batch_acc, valid_loss, valid_acc), end='')
                 else:
-                    print('\r{:d}/{:d} [{}] -{:.0f}s -{:.0f}ms/batch -batch_loss: {:.4f} -batch_acc: {:.4f} '.format(batch_count*batch_size,training_size,process_bar, gap,gap*1000/batch_count, batch_loss, batch_acc), end='')
+                    print('\r{:d}/{:d} [{}] -{:.0f}s -{:.0f}ms/batch -batch_loss: {:.4f} -batch_acc: {:.4f} '.format(trained_nums,training_size,process_bar, gap,gap*1000/batch_count, batch_loss, batch_acc), end='')
             print()
 
 

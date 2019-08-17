@@ -22,7 +22,7 @@ class Optimizer():
 
 
 class StochasticGradientDescent(Optimizer):
-    def __init__(self,lr,decay,*args,**kwargs):
+    def __init__(self,lr=0.01,decay=0.0,*args,**kwargs):
         super(StochasticGradientDescent,self).__init__(lr,decay)
 
 
@@ -37,8 +37,8 @@ class StochasticGradientDescent(Optimizer):
 
 
 class Momentum(Optimizer):
-    def __init__(self,lr,decay,beta=0.9,*args,**kwargs):
-        self.beta=beta
+    def __init__(self,lr=0.01,decay=0.0,rho=0.9,*args,**kwargs):
+        self.rho=rho
         self.velocity=None
 
         super(Momentum,self).__init__(lr,decay)
@@ -50,7 +50,7 @@ class Momentum(Optimizer):
             self.velocity=[np.zeros_like(p.output_tensor) for p in trainable_variables]
 
         for i,(v,var) in enumerate(zip(self.velocity,trainable_variables)):
-            v=self.beta*v+(1-self.beta)*var.grads
+            v=self.rho*v+(1-self.rho)*var.grads
             var.output_tensor-=self.lr*v
             self.velocity[i]=v
 
@@ -59,8 +59,8 @@ class Momentum(Optimizer):
 
 
 class RMSprop(Optimizer):
-    def __init__(self,lr,decay,beta=0.9,epsilon=1e-8,*args,**kwargs):
-        self.beta=beta
+    def __init__(self,lr=0.001,decay=0.0,rho=0.9,epsilon=1e-7,*args,**kwargs):
+        self.rho=rho
         self.epsilon=epsilon
         self.ms=None
 
@@ -73,15 +73,15 @@ class RMSprop(Optimizer):
             self.ms=[np.zeros_like(p.output_tensor) for p in trainable_variables]
 
         for i,(s,var) in enumerate(zip(self.ms,trainable_variables)):
-            s=self.beta*s+(1-self.beta)*np.square(var.grads)
-            var.output_tensor-=self.lr*var.grads/np.sqrt(s+self.epsilon)
-            self.ms[i]=s
+            new_s=self.rho*s+(1-self.rho)*np.square(var.grads)
+            var.output_tensor-=self.lr*var.grads/np.sqrt(new_s+self.epsilon)
+            self.ms[i]=new_s
 
         super(RMSprop,self).update(trainable_variables)
 
 
 class AdaGrad(Optimizer):
-    def __init__(self,lr,decay,epsilon=1e-6):
+    def __init__(self,lr=0.01,decay=0.0,epsilon=1e-7):
         super(AdaGrad,self).__init__(lr,decay)
         self.epsilon=epsilon
         self.ms=None
@@ -97,10 +97,11 @@ class AdaGrad(Optimizer):
         super(AdaGrad,self).update(trainable_variables)
 
 
+
 class AdaDelta(Optimizer):
-    def __init__(self,decay,lr=None,beta1=0.9,epsilon=1e-6):
+    def __init__(self,decay=0.0,lr=1.0,rho=0.95,epsilon=1e-7):
         super(AdaDelta,self).__init__(lr,decay)
-        self.beta1=beta1
+        self.rho=rho
         self.epsilon=epsilon
         self.ms=None
         self.delta_x=None
@@ -113,10 +114,10 @@ class AdaDelta(Optimizer):
             self.delta_x=[np.zeros_like(g.grads) for g in trainable_variables]
 
         for i,(s,var,x) in enumerate(zip(self.ms,trainable_variables,self.delta_x)):
-            s=self.beta1*s+(1-self.beta1)*np.power(var.grads,2)
+            s=self.rho*s+(1-self.rho)*np.power(var.grads,2)
             g_=np.sqrt((x+self.epsilon)/(s+self.epsilon))*var.grads
             var.output_tensor-=g_
-            x=self.beta1*x+(1-self.beta1)*np.power(g_,2)
+            x=self.rho*x+(1-self.rho)*np.power(g_,2)
             self.ms[i]=s
             self.delta_x[i]=x
         super(AdaDelta,self).update(trainable_variables)
@@ -125,7 +126,7 @@ class AdaDelta(Optimizer):
 
 
 class Adam(Optimizer):
-    def __init__(self,lr,decay,beta1=0.9,beta2=0.999,epsilon=1e-8,*args,**kwargs):
+    def __init__(self,lr=0.001,decay=0.0,beta1=0.9,beta2=0.999,epsilon=1e-7,*args,**kwargs):
         self.beta1=beta1
         self.beta2=beta2
         self.epsilon=epsilon
@@ -158,23 +159,23 @@ class Adam(Optimizer):
 
 
 
-def get_optimizer(optimizer,lr=0.1,decay=0.,beta1=0.9,beta2=0.999,epsilon=1e-8,*args,**kwargs):
+def get_optimizer(optimizer):
     if optimizer.__class__.__name__=='str':
         optimizer=optimizer.lower()
         if optimizer=='sgd':
-            return StochasticGradientDescent(lr,decay,*args,**kwargs)
+            return StochasticGradientDescent()
         elif optimizer=='adam':
-            return Adam(lr,decay,beta1,beta2,epsilon,*args,**kwargs)
+            return Adam()
         elif optimizer=='rmsprop':
-            return RMSprop(lr,decay,*args,**kwargs)
+            return RMSprop()
         elif optimizer=='momentum':
-            return Momentum(lr,decay,*args,**kwargs)
+            return Momentum()
         elif optimizer=='adagrad':
-            return AdaGrad(lr,decay,epsilon)
+            return AdaGrad()
         elif optimizer=='adadelta':
-            return AdaDelta(decay,lr,beta1,epsilon)
-        elif isinstance(optimizer,Optimizer):
-            return copy.deepcopy(optimizer)
-        else:
-            raise ValueError('unknown optimizer type!')
+            return AdaDelta()
+    elif isinstance(optimizer,Optimizer):
+        return copy.deepcopy(optimizer)
+    else:
+        raise ValueError('unknown optimizer type!')
 
