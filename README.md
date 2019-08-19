@@ -330,3 +330,7 @@ waiting for implement.
 - to_categorical (convert inputs to one-hot vector/matrix)
 - concatenate (concatenate Nodes that have the same shape in specify axis)
 - pad_sequences (pad sequences to the same length)
+
+## Contact
+
+- Email: eleven_1111@outlook.com
