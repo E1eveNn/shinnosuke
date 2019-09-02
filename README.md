@@ -8,11 +8,11 @@
 
 ## Descriptions
 
-Shinnosuke is a high-level neural network which API almost identity to Keras with slightly differences. It was written by Python only, and dedicated to realize experimentations quickly.
+Shinnosuke is a high-level neural network which has almost the same API to Keras with slightly differences. It was written by Python only, and dedicated to realize experimentations quickly.
 
 Here are some features of Shinnosuke:
 
-1. Based on **Numpy** (CPU version)  and **native** to Python.
+1. Based on **Numpy** (CPU version)  and **native** to Python.   [GPU Version](https://github.com/eLeVeNnN/shinnosuke-gpu)
 2. **Without** any other **3rd-party** deep learning library.
 3. **Keras-like API**, several basic AI Examples are provided, easy to get start.
 4. Support commonly used models such as: Dense, Conv2D, MaxPooling2D, LSTM, SimpleRNN, etc.
@@ -35,7 +35,7 @@ Here is a example of `Sequential` model:
 ```python
 from shinnosuke.models import Sequential
 
-m=Sequential()
+m = Sequential()
 ```
 
 Using `.add()` to connect layers:
@@ -43,8 +43,8 @@ Using `.add()` to connect layers:
 ```python
 from shinnosuke.models import Dense
 
-m.add(Dense(n_out=500, activation='relu', n_in=784))  #must be specify n_in if current layer is the first layer of model
-m.add(Dense(n_out=10, activation='softmax'))  #no need to specify n_in as shinnosuke will automatic calculate the input and output shape
+m.add(Dense(n_out = 500, activation = 'relu', n_in = 784))  #must be specify n_in if current layer is the first layer of model
+m.add(Dense(n_out = 10, activation = 'softmax'))  #no need to specify n_in as shinnosuke will automatic calculate the input and output shape
 ```
 
 Here are some differences with Keras, n_out and n_in are named units and input_dim in Keras respectively.
@@ -52,7 +52,7 @@ Here are some differences with Keras, n_out and n_in are named units and input_d
 Once you have constructed your model, you should configure it with `.compile()` before training:
 
 ```python
-m.compile(loss='sparse_categorical_crossentropy', optimizer='sgd')
+m.compile(loss = 'sparse_categorical_crossentropy', optimizer = 'sgd')
 ```
 
 If you apply softmax to multi-classify task and your labels are one-hot encoded vectors/matrix, you shall specify loss as  sparse_categorical_crossentropy, otherwise use categorical_crossentropy. (While in Keras categorical_crossentropy supports for one-hot encoded labels). And Shinnosuke model only supports one metrics--**accuracy**, which no need to specify in `compile`.
@@ -60,23 +60,23 @@ If you apply softmax to multi-classify task and your labels are one-hot encoded 
  You can further configure your optimizer by passing more parameters:
 
 ```python
-m.compile(loss=shinnosuke.Objectives.SparseCategoricalCrossEntropy, optimizer='sgd', learning_rate=0.01, epsilon=1e-8)
+m.compile(loss = shinnosuke.Objectives.SparseCategoricalCrossEntropy, optimizer = 'sgd', learning_rate = 0.01, epsilon = 1e-8)
 ```
 
 Having finished `compile`, you can start training your data in batches:
 
 ```python
 #trainX and trainy are Numpy arrays --for 2 dimension data, trainX's shape should be (training_nums,input_dim)
-m.fit(trainX, trainy, batch_size=128, epochs=5, validation_ratio=0., draw_acc_loss=True)
+m.fit(trainX, trainy, batch_size = 128, epochs = 5, validation_ratio = 0., draw_acc_loss = True)
 ```
 
-By specify `validation_ratio`=`(0.0,1.0]`, shinnosuke will split validation data from training data according to validation_ratio, otherwise validation_ratio=0. means no validation data. Alternatively you can  feed validation_data manually:
+By specify `validation_ratio` = `(0.0,1.0]`, shinnosuke will split validation data from training data according to validation_ratio, otherwise validation_ratio=0. means no validation data. Alternatively you can  feed validation_data manually:
 
 ```python
-m.fit(trainX, trainy, batch_size=128, epochs=5, validation_data=(validX,validy), draw_acc_loss=True)
+m.fit(trainX, trainy, batch_size = 128, epochs = 5, validation_data = (validX, validy), draw_acc_loss = True)
 ```
 
-If `draw_acc_loss`=**True**, a dynamic updating figure will be shown in the training process, like below:
+If `draw_acc_loss` = **True**, a dynamic updating figure will be shown in the training process, like below:
 
 <div align=center>
 	<img src="https://github.com/eLeVeNnN/shinnosuke/blob/master/docs/imgs/draw_acc.png" width="">
@@ -101,7 +101,7 @@ For `Functional` model, first instantiate an `Input` layer:
 ```python
 from shinnosuke.layers.Base import Input
 
-X_input=Input(shape=(None,1,28,28))   #(batch_size,channels,height,width)
+X_input = Input(shape = (None, 1, 28, 28))   #(batch_size,channels,height,width)
 ```
 
 You need to specify the input shape, notice that for Convolutional networks,data's channels must be in the `axis 1` instead of `-1`, and you should state batch_size as None which is unnecessary in Keras.
@@ -115,13 +115,13 @@ from shinnosuke.layers.Activation import Activation
 from shinnosuke.layers.Normalization import BatchNormalization
 from shinnosuke.layers.FC import Flatten,Dense
 
-X=Conv2D(8,(2,2),padding='VALID',initializer='normal',activation='relu')(X_input)
-X=MaxPooling2D((2,2))(X)
-X=Flatten()(X)
-X=Dense(10,initializer='normal',activation='softmax')(X)
-model=Model(inputs=X_input,outputs=X)  
-model.compile(optimizer='sgd',loss='sparse_categorical_cross_entropy')
-model.fit(trainX,trainy,batch_size=256,epochs=80,validation_ratio=0.)
+X = Conv2D(8, (2, 2), padding = 'VALID', initializer = 'normal', activation = 'relu')(X_input)
+X = MaxPooling2D((2, 2))(X)
+X = Flatten()(X)
+X = Dense(10, initializer = 'normal', activation = 'softmax')(X)
+model = Model(inputs = X_input, outputs = X)  
+model.compile(optimizer = 'sgd', loss = 'sparse_categorical_cross_entropy')
+model.fit(trainX, trainy, batch_size = 256, epochs = 80, validation_ratio = 0.)
 ```
 
 Pass inputs and outputs layer to `Model()`, and then compile and fit model like `Sequential`model.
@@ -142,10 +142,10 @@ As you will see soon in below, Shinnosuke has two basic classes - Layer and Node
 from shinnosuke.layers.Base import Input,Add
 from shinnosuke.layers.FC import Dense
 
-X=Input(shape=(3,5))
-X_shortcut=X
-X=Dense(5)(X)  #Dense will output a (3,5) tensor
-X=Add()([X_shortcut,X])
+X = Input(shape = (3, 5))
+X_shortcut = X
+X = Dense(5)(X)  #Dense will output a (3,5) tensor
+X = Add()([X_shortcut, X])
 ```
 
 Meanwhile Shinnosuke will construct a graph as below:
@@ -163,9 +163,9 @@ Meanwhile Shinnosuke will construct a graph as below:
 ```python
 from shinnosuke.layers.Base import Variable
 
-x=Variable(3)
-y=Variable(5)
-z=x+y  
+x = Variable(3)
+y = Variable(5)
+z = x + y  
 print(z.get_value())
 ```
 
@@ -189,24 +189,24 @@ from shinnosuke.layers.FC import Dense
 import numpy as np
 
 #announce a Dense layer
-fullyconnected=Dense(4,n_in=5)
-m=Sequential()
+fullyconnected = Dense(4, n_in = 5)
+m = Sequential()
 m.add(fullyconnected)
-m.compile(optimizer='sgd',loss='mse')  #don't mean to train it, use compile to initialize parameters
+m.compile(optimizer = 'sgd', loss = 'mse')  #don't mean to train it, use compile to initialize parameters
 #initialize inputs
 np.random.seed(0)
-X=np.random.rand(3,5)
+X = np.random.rand(3, 5)
 #feed X as fullyconnected's inputs
-fullyconnected.feed(X,'inputs')
+fullyconnected.feed(X, 'inputs')
 #forward
 fullyconnected.forward()
-out1=fullyconnected.get_value()
+out1 = fullyconnected.get_value()
 print(out1.get_value())
 #feed gradient to fullyconnected
-fullyconnected.feed(np.ones_like(out1),'grads')
+fullyconnected.feed(np.ones_like(out1), 'grads')
 #backward
 fullyconnected.backward()
-W,b=fullyconnected.variables
+W, b = fullyconnected.variables
 print(W.grads)
 ```
 
@@ -215,12 +215,12 @@ We can also construct the same layer by using following codes:
 ```python
 from shinnosuke.layers.Base import Variable
 
-a=Variable(X) # the same as X in previous fullyconnected
-c=Variable(W.get_value())  # the same as W in previous fullyconnected
-d=Variable(b.get_value())  # the same as b in previous fullyconnected
-out2=a@c+d  # @ represents for matmul
+a = Variable(X) # the same as X in previous fullyconnected
+c = Variable(W.get_value())  # the same value as W in previous fullyconnected
+d = Variable(b.get_value())  # the same value as b in previous fullyconnected
+out2 = a @ c + d   # @ represents for matmul
 print(out2.get_value())
-out2.grads=np.ones_like(out2.get_value())
+out2.grads = np.ones_like(out2.get_value())   #specify gradients
 # by using grad(),shinnosuke will automatically calculate the gradient from out2 to c
 c.grad()
 print(c.grads)
