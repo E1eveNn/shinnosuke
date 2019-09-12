@@ -63,12 +63,14 @@ class Embedding(Layer):
 
     def backward(self):
         W,=self.variables
-        flatten_idxs=self.input_tensor.flatten()
-        unique_idxs=np.unique(flatten_idxs)
-        flatten_grads=self.grads.reshape(-1,self.output_shape[-1])
+        # flatten_idxs=self.input_tensor.flatten()
+        # unique_idxs=np.unique(flatten_idxs)
+        # flatten_grads=self.grads.reshape(-1,self.output_shape[-1])
+        # if W.require_grads:
+        #     for idx in unique_idxs:
+        #         W.grads[idx]+=np.sum(flatten_grads[flatten_idxs==idx],axis=0)
         if W.require_grads:
-            for idx in unique_idxs:
-                W.grads[idx]+=np.sum(flatten_grads[flatten_idxs==idx],axis=0)
+            np.add.at(W.grads,self.input_tensor,self.grads)
 
 
 

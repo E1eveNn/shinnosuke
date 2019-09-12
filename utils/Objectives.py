@@ -105,17 +105,13 @@ class CategoricalCrossEntropy(Objective):
 
 
     def calc_loss(self,y_hat,y_true):
-        to_sum_shape = np.asarray(y_hat.shape[:-1])
-        avg = np.prod(to_sum_shape)
-        loss = 0
-        if y_hat.ndim == 2:
-            for m in range(y_hat.shape[0]):
-                loss -= np.log(y_hat[m, y_true[m]])
-        elif y_hat.ndim == 3:
-            for m in range(y_hat.shape[0]):
-                for n in range(y_hat.shape[1]):
-                    loss -= np.log(y_hat[m, n, y_true[m, n]])
-        loss /= avg
+        to_sum_dim=np.prod(y_hat.shape[:-1])
+        last_dim=y_hat.shape[-1]
+        N=y_hat.shape[0]
+        probs=y_hat.reshape(-1,last_dim)
+        y_flat=y_true.reshape(to_sum_dim)
+        loss = -np.sum(np.log(probs[np.arange(to_sum_dim), y_flat])) / N
+
         return loss
         # to_sum_shape=np.asarray(y_hat.shape[:-1])
         # avg=np.prod(to_sum_shape)
@@ -141,17 +137,17 @@ class CategoricalCrossEntropy(Objective):
         #
         # y_hat[idx]-=1
         # return y_hat/avg
-        to_sum_shape = np.asarray(y_hat.shape[:-1])
-        avg = np.prod(to_sum_shape)
-        output = y_hat
-        if y_hat.ndim == 2:
-            for m in range(y_hat.shape[0]):
-                output[m, y_true[m]] -= 1
-        elif y_hat.ndim == 3:
-            for m in range(y_hat.shape[0]):
-                for n in range(y_hat.shape[1]):
-                    output[m, n, y_true[m, n]] -= 1
-        output /= avg
+        to_sum_dim=np.prod(y_hat.shape[:-1])
+        last_dim=y_hat.shape[-1]
+        N=y_hat.shape[0]
+
+        probs=y_hat.reshape(-1,last_dim)
+        y_flat = y_true.reshape(to_sum_dim)
+        probs[np.arange(to_sum_dim), y_flat] -= 1
+        probs/=N
+
+        output=probs.reshape(y_hat.shape)
+
         return output
 
 

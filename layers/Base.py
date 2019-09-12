@@ -4,7 +4,6 @@ import numpy as np
 
 
 
-
 class Node(object):
     '''
     basic class for layers in network
@@ -97,9 +96,9 @@ class Node(object):
 
 
 class Constant(Node):
-    def __init__(self,output_tensor,name='constant'):
+    def __init__(self,value,name='constant'):
         Node.__init__(self)
-        self.output_tensor=np.array(output_tensor)
+        self.output_tensor=np.array(value)
         self.name=name
 
 

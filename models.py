@@ -222,6 +222,52 @@ class Sequential():
 
 
 
+    def __str__(self):
+        bar_nums = 75
+        print('*' * bar_nums)
+
+        print('Layer(type)'.ljust(20),'Output Shape'.ljust(20) ,'Param'.ljust(12),'Connected to'.ljust(15))
+        print('#' * bar_nums)
+        total_params = 0
+        for layer in self.layers:
+
+            if layer.name is not None:
+                layer_name = '%s (%s)'%(layer.name,layer.__class__.__name__)
+            else:
+                layer_name = str(layer.__class__.__name__)
+
+            params = layer.params_count()
+            total_params += params
+            first = True
+            if layer.inbounds:
+
+                for prev_layer in layer.inbounds:
+                    if prev_layer.name is not None:
+                        connected = prev_layer.name
+                    else:
+                        connected = prev_layer.__class__.__name__
+                    if first:
+                        print(layer_name.ljust(20),str(layer.output_shape).ljust(20), str(params).ljust(12),connected.ljust(15))
+                        first = False
+                    else:
+                        print(''.ljust(20),''.ljust(20), ''.ljust(12),connected.ljust(15))
+            else:
+                connected = '\n'
+                print(layer_name.ljust(20),str(layer.output_shape).ljust(20), str(params).ljust(12),connected.ljust(15))
+            print('-' * bar_nums)
+
+        print('*' * bar_nums)
+        trainable_params = 0
+        for v in self.trainable_variables:
+            trainable_params += v.output_tensor.size
+        params_details = 'Total params: %d\n'%(total_params)
+        params_details += 'Trainable params: %d\n'%(trainable_params)
+        params_details += 'Non-trainable params: %d\n' % (total_params-trainable_params)
+        return params_details
+
+
+
+
 
 class Model():
     def __init__(self, inputs=None,outputs=None):
@@ -257,7 +303,7 @@ class Model():
                     G[n] = {'in': set(), 'out': set()}
                 for m in n.outbound_layers:
                     for var in m.variables:
-                        if var.require_grads:
+                        if var.require_grads and var not in trainable_variables:
                             trainable_variables.append(var)
                     if m not in G:
                         G[m] = {'in': set(), 'out': set()}
@@ -277,7 +323,8 @@ class Model():
                     # if no other incoming edges add to S
                     if len(G[m]['in']) == 0:
                         S.add(m)
-            return graph,trainable_variables
+            return graph, trainable_variables
+
         elif mode=='backward':
 
             layers = [input_layers]
@@ -312,7 +359,7 @@ class Model():
     def compile(self, optimizer, loss):
         assert self.inputs is not None and self.outputs is not None
 
-        self.forwrad_graph,self.trainable_variables=self.topological_sort(self.inputs,mode='forward')
+        self.forward_graph,self.trainable_variables=self.topological_sort(self.inputs,mode='forward')
         self.backward_graph=self.topological_sort(self.outputs,mode='backward')
 
         self.loss = get_objective(loss)
@@ -344,7 +391,7 @@ class Model():
             start_time = time.time()
             for xs, ys in mini_batches:
                 batch_count += 1
-                trained_nums+=xs.shape[0]
+                trained_nums += xs.shape[0]
                 # forward
                 y_hat = self.predict(xs)
 
@@ -388,7 +435,7 @@ class Model():
 
     def predict(self, X, is_training=True):
         self.inputs.input_tensor = X
-        for node in self.forwrad_graph:
+        for node in self.forward_graph:
             node.forward(is_training=is_training)
         y_hat = self.outputs.output_tensor
         return y_hat
@@ -482,17 +529,63 @@ class Model():
 
     def save(self, save_path):
         with open(save_path + '.pkl', 'wb') as f:
-            pickle.dump([self.layers, self.optimizer, self.loss], f)
+            pickle.dump([self.forward_graph, self.backward_graph, self.optimizer, self.loss], f)
 
 
 
     def load(self, model_path):
         with open(model_path + '.pkl', 'rb') as f:
-            layers, optimizer, loss = pickle.load(f)
+            f_graph, b_graph, optimizer, loss = pickle.load(f)
 
-        self.layers = layers
+        self.forward_graph = f_graph
+        self.backward_graph = b_graph
         self.optimizer = optimizer
         self.loss = loss
+
+
+
+    def __str__(self):
+        bar_nums = 75
+        print('*' * bar_nums)
+
+        print('Layer(type)'.ljust(20),'Output Shape'.ljust(20) ,'Param'.ljust(12),'Connected to'.ljust(15))
+        print('#' * bar_nums)
+        total_params = 0
+        for layer in self.forward_graph:
+
+            if layer.name is not None:
+                layer_name = '%s (%s)'%(layer.name,layer.__class__.__name__)
+            else:
+                layer_name = str(layer.__class__.__name__)
+
+            params = layer.params_count()
+            total_params += params
+            first = True
+            if layer.inbounds:
+
+                for prev_layer in layer.inbounds:
+                    if prev_layer.name is not None:
+                        connected = prev_layer.name
+                    else:
+                        connected = prev_layer.__class__.__name__
+                    if first:
+                        print(layer_name.ljust(20),str(layer.output_shape).ljust(20), str(params).ljust(12),connected.ljust(15))
+                        first = False
+                    else:
+                        print(''.ljust(20),''.ljust(20), ''.ljust(12),connected.ljust(15))
+            else:
+                connected = '\n'
+                print(layer_name.ljust(20),str(layer.output_shape).ljust(20), str(params).ljust(12),connected.ljust(15))
+            print('-' * bar_nums)
+
+        print('*' * bar_nums)
+        trainable_params = 0
+        for v in self.trainable_variables:
+            trainable_params += v.output_tensor.size
+        params_details = 'Total params: %d\n'%(total_params)
+        params_details += 'Trainable params: %d\n'%(trainable_params)
+        params_details += 'Non-trainable params: %d\n' % (total_params-trainable_params)
+        return params_details
 
 
 

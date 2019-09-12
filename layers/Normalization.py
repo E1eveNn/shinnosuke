@@ -6,7 +6,7 @@ from ..utils.Initializers import get_initializer
 
 
 class BatchNormalization(Layer):
-    def __init__(self,epsilon=1e-6,momentum=0.9,axis=1,gamma_initializer='ones',beta_initializer='zeros',moving_mean_initializer='zeros', moving_variance_initializer='ones'):
+    def __init__(self,epsilon=1e-6,momentum=0.99,axis=1,gamma_initializer='ones',beta_initializer='zeros',moving_mean_initializer='zeros', moving_variance_initializer='ones'):
         # axis=1 when input Fully Connected Layers(data shape:(M,N),where M donotes Batch-size,and N represents feature nums)  ---also axis=-1 is the same
         # axis=1 when input Convolution Layers(data shape:(M,C,H,W),represents Batch-size,Channels,Height,Width,respectively)
 
@@ -22,6 +22,7 @@ class BatchNormalization(Layer):
 
 
     def connect(self,prev_layer):
+        assert len(prev_layer.output_shape)>=2
         n_in=prev_layer.output_shape[self.axis]
         gamma = Variable(self.gamma_initializer(n_in))
         beta = Variable(self.beta_initializer(n_in))
@@ -38,6 +39,7 @@ class BatchNormalization(Layer):
 
 
     def __call__(self,prev_layer):
+        assert len(prev_layer.output_shape) >= 2
         super(BatchNormalization,self).__call__(prev_layer)
         n_in = self.input_shape[self.axis]
         gamma = Variable(self.gamma_initializer(n_in))
@@ -90,15 +92,28 @@ class BatchNormalization(Layer):
 
     def forward(self,is_training=True):
         inputs=self.input_tensor
+        ndim=inputs.ndim
         self.input_shape=inputs.shape
-        if self.input_tensor.ndim==4:
-            N,C,H,W=self.input_shape
-            inputs=inputs.transpose(0,3,2,1).reshape(N*H*W,C)
+        if self.axis==-1 or self.axis==ndim-1:
+            #for example,inputs:(N,M),doing nothing
+            pass
+        else:
+            #for instance,inputs:(N,C,H,W),self.axis=1,after swapaxes,Inputs:(N,W,H,C)
+            inputs=np.swapaxes(inputs,self.axis,-1)
+
+        #(N,W,H,C) / (N,M)
+        before_reshape_shape=inputs.shape
+        #(N*W*H,C) /(N,M)
+        inputs = inputs.reshape(-1, self.input_shape[self.axis])
+
+
+        # if self.input_tensor.ndim==4:
+        #     N,C,H,W=self.input_shape
+        #     inputs=inputs.transpose(0,3,2,1).reshape(N*H*W,C)
 
 
         gamma,beta=self.variables
         if is_training:
-
             #calc mean
             mean=np.mean(inputs,axis=0)
             #calc var
@@ -115,9 +130,19 @@ class BatchNormalization(Layer):
         else:
             scale = gamma.output_tensor / (np.sqrt(self.moving_variance + self.epsilon))
             outputs = inputs * scale + (beta.output_tensor - self.moving_mean * scale)
-        if self.input_tensor.ndim==4:
-            N, C, H, W = self.input_shape
-            outputs=outputs.reshape(N, W, H, C).transpose(0, 3, 2, 1)
+
+        #for instance,outputs:(N*W*H,C), reshape to (N,W,H,C) or (N,M) reshape to (N,M)
+        outputs = outputs.reshape(before_reshape_shape)
+
+        if self.axis == -1 or self.axis == ndim - 1:
+            pass
+        else:
+            # for instance,outputs:(N,W,H,C),self.axis=1,after swapaxes,outputs:(N,C,H,W)
+            outputs = np.swapaxes(outputs, self.axis, -1)
+
+        # if self.input_tensor.ndim==4:
+        #     N, C, H, W = self.input_shape
+        #     outputs=outputs.reshape(N, W, H, C).transpose(0, 3, 2, 1)
         self.output_tensor=outputs
 
         if self.require_grads:
@@ -153,9 +178,21 @@ class BatchNormalization(Layer):
 
     def backward(self):
         grads=self.grads
-        if len(self.input_shape)==4:
-            N, C, H, W = self.input_shape
-            grads=grads.transpose(0, 3, 2, 1).reshape((N * H * W, C))
+        ndim=grads.ndim
+        # if len(self.input_shape)==4:
+        #     N, C, H, W = self.input_shape
+        #     grads=grads.transpose(0, 3, 2, 1).reshape((N * H * W, C))
+        if self.axis == -1 or self.axis == ndim - 1:
+            # for example,inputs:(N,M),doing nothing
+            pass
+        else:
+            # for instance,inputs:(N,C,H,W),self.axis=1,after swapaxes,Inputs:(N,W,H,C)
+            grads = np.swapaxes(grads, self.axis, -1)
+
+        # (N,W,H,C) / (N,M)
+        before_reshape_shape = grads.shape
+        # (N*W*H,C) /(N,M)
+        grads = grads.reshape(-1, self.input_shape[self.axis])
 
         gamma,beta=self.variables
         xmu, sqrtvar, normalized_x = self.cache
@@ -169,9 +206,23 @@ class BatchNormalization(Layer):
         dvar = np.sum(np.power( - 1./sqrtvar, 3) * xmu * dnormalized_x * 0.5, axis=0)
         dmean=np.sum( - dnormalized_x / sqrtvar, axis=0) - 2 * dvar * np.mean(xmu, axis=0)
         outputs=dnormalized_x / sqrtvar + dvar * 2 * xmu / N + dmean / N
-        if len(self.input_shape)==4:
-            N, C, H, W = self.input_shape
-            outputs = outputs.reshape(N, W, H, C).transpose(0, 3, 2, 1)
+        # if len(self.input_shape)==4:
+        #     N, C, H, W = self.input_shape
+        #     outputs = outputs.reshape(N, W, H, C).transpose(0, 3, 2, 1)
+
+        outputs = outputs.reshape(before_reshape_shape)
+
+        if self.axis == -1 or self.axis == ndim - 1:
+            pass
+        else:
+            # for instance,outputs:(N,W,H,C),self.axis=1,after swapaxes,outputs:(N,C,H,W)
+            outputs = np.swapaxes(outputs, self.axis, -1)
+
+        # if self.input_tensor.ndim==4:
+        #     N, C, H, W = self.input_shape
+        #     outputs=outputs.reshape(N, W, H, C).transpose(0, 3, 2, 1)
+        self.output_tensor = outputs
+
         for layer in self.inbounds:
             if layer.require_grads:
                 layer.grads+=outputs

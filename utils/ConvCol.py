@@ -39,5 +39,4 @@ def col2im(inputs_shape,pad_size,filter_size,stride,dcol):
         for x in range(filter_w):
             x_max = x + stride * n_W
             output[:, :, y:y_max:stride, x:x_max:stride] += dcol[:, :, y, x, :, :]
-
     return output[:, :, pad_h:n_H_prev + pad_h, pad_w:n_W_prev + pad_w]

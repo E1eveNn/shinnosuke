@@ -21,17 +21,17 @@ def to_categorical(inputs):
 
 
 def concatenate(*variables,axis,output=None,name=None):
-    new_shape=np.asarray(variables[0].shape)
+    new_shape=np.asarray(variables[0].output_shape)
     new_value=variables[0].output_tensor
     for i in range(1,len(variables)):
-        shape=np.asarray(variables[i].shape)
+        shape=np.asarray(variables[i].output_shape)
         new_shape[axis]+=shape[axis]
         new_value=np.concatenate((new_value,variables[i].output_tensor),axis=axis)
     if output is None:
-        newVar=Variable(initial_output_tensor=new_value,shape=new_shape.tolist(),name=name)
+        newVar=Variable(initial_value=new_value,shape=new_shape.tolist(),name=name)
     else:
         output.output_tensor=new_value
-        output.shape=new_shape
+        output.output_shape=new_shape
         output.name=name
         newVar=output
 
