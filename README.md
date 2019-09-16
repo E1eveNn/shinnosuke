@@ -15,7 +15,7 @@ Here are some features of Shinnosuke:
 1. Based on **Numpy** (CPU version)  and **native** to Python.   [GPU Version](https://github.com/eLeVeNnN/shinnosuke-gpu)
 2. **Without** any other **3rd-party** deep learning library.
 3. **Keras-like API**, several basic AI Examples are provided, easy to get start.
-4. Support commonly used models such as: Dense, Conv2D, MaxPooling2D, LSTM, SimpleRNN, etc.
+4. Support commonly used models such as: *Dense, Conv2D, MaxPooling2D, LSTM, SimpleRNN, etc*.
 5. **Sequential** model (for most  sequence network combinations ) and **Functional** model (for resnet, etc) are implemented.
 6. Training is conducted on forward **graph** and backward **graph**.
 7. **Autograd** is supported .
@@ -41,7 +41,7 @@ m = Sequential()
 Using `.add()` to connect layers:
 
 ```python
-from shinnosuke.models import Dense
+from shinnosuke.layers import Dense
 
 m.add(Dense(n_out = 500, activation = 'relu', n_in = 784))  #must be specify n_in if current layer is the first layer of model
 m.add(Dense(n_out = 10, activation = 'softmax'))  #no need to specify n_in as shinnosuke will automatic calculate the input and output shape
@@ -57,10 +57,23 @@ m.compile(loss = 'sparse_categorical_crossentropy', optimizer = 'sgd')
 
 If you apply softmax to multi-classify task and your labels are one-hot encoded vectors/matrix, you shall specify loss as  sparse_categorical_crossentropy, otherwise use categorical_crossentropy. (While in Keras categorical_crossentropy supports for one-hot encoded labels). And Shinnosuke model only supports one metrics--**accuracy**, which no need to specify in `compile`.
 
- You can further configure your optimizer by passing more parameters:
+Use `print()` function to see details of model:
 
 ```python
-m.compile(loss = shinnosuke.Objectives.SparseCategoricalCrossEntropy, optimizer = 'sgd', learning_rate = 0.01, epsilon = 1e-8)
+print(m)
+# you shall see 
+***************************************************************************
+Layer(type)          Output Shape         Param        Connected to   
+###########################################################################
+Dense                (None, 500)          392500       
+              
+---------------------------------------------------------------------------
+Dense                (None, 10)           5010         Dense          
+---------------------------------------------------------------------------
+***************************************************************************
+Total params: 397510
+Trainable params: 397510
+Non-trainable params: 0
 ```
 
 Having finished `compile`, you can start training your data in batches:
@@ -82,6 +95,14 @@ If `draw_acc_loss` = **True**, a dynamic updating figure will be shown in the tr
 	<img src="https://github.com/eLeVeNnN/shinnosuke/blob/master/docs/imgs/draw_acc.png" width="">
 </div>
 
+
+Once completing training your model, you can save or load your model by `save()` / `load()`, respectively.
+```python
+m.save(save_path)
+m.load(model_path)
+```
+
+
 Evaluate your model performance by `.evaluate()`:
 
 ```python
@@ -99,7 +120,7 @@ y_hat = m.predict(x_test)
 For `Functional` model, first instantiate an `Input` layer:
 
 ```python
-from shinnosuke.layers.Base import Input
+from shinnosuke.layers import Input
 
 X_input = Input(shape = (None, 1, 28, 28))   #(batch_size,channels,height,width)
 ```
@@ -110,10 +131,10 @@ Then Combine your layers by functional API:
 
 ```python
 from shinnosuke.models import Model
-from shinnosuke.layers.Convolution import Conv2D,MaxPooling2D
-from shinnosuke.layers.Activation import Activation
-from shinnosuke.layers.Normalization import BatchNormalization
-from shinnosuke.layers.FC import Flatten,Dense
+from shinnosuke.layers import Conv2D,MaxPooling2D
+from shinnosuke.layers import Activation
+from shinnosuke.layers import BatchNormalization
+from shinnosuke.layers import Flatten,Dense
 
 X = Conv2D(8, (2, 2), padding = 'VALID', initializer = 'normal', activation = 'relu')(X_input)
 X = MaxPooling2D((2, 2))(X)
@@ -139,8 +160,8 @@ In the [Examples folder](https://github.com/eLeVeNnN/shinnosuke/Examples/) of th
 As you will see soon in below, Shinnosuke has two basic classes - Layer and Node. For Layer, operations between layers can be described like this (here gives an example of '+' ):
 
 ```py
-from shinnosuke.layers.Base import Input,Add
-from shinnosuke.layers.FC import Dense
+from shinnosuke.layers import Input,Add
+from shinnosuke.layers import Dense
 
 X = Input(shape = (3, 5))
 X_shortcut = X
@@ -185,7 +206,7 @@ For a simple fully connected neural network, you can use `Dense()` to construct 
 
 ```python
 from shinnosuke.models import Sequential
-from shinnosuke.layers.FC import Dense
+from shinnosuke.layers import Dense
 import numpy as np
 
 #announce a Dense layer
@@ -213,7 +234,7 @@ print(W.grads)
 We can also construct the same layer by using following codes:
 
 ```python
-from shinnosuke.layers.Base import Variable
+from shinnosuke.layers import Variable
 
 a = Variable(X) # the same as X in previous fullyconnected
 c = Variable(W.get_value())  # the same value as W in previous fullyconnected
@@ -260,9 +281,9 @@ Then you can install Shinnosuke by using pip:
 - Activation
 - Input
 - Dropout
-- BatchNormalization
-- LayerNormalization
-- GroupNormalization
+- Batch Normalization
+- Layer Normalization
+- Group Normalization
 - TimeDistributed
 - SimpleRNN
 - LSTM
