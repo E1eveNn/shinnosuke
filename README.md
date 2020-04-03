@@ -174,7 +174,7 @@ X = Add()([X_shortcut, X])
 Meanwhile Shinnosuke will construct a graph as below:
 
 <div align=center>
-	<img src="https://github.com/eLeVeNnN/shinnosuke/blob/master/docs/imgs/layer_graph.jpg" width="300px",height="300px">
+	<img src="https://github.com/eLeVeNnN/shinnosuke/blob/master/docs/imgs/layer_graph.jpg" width="300px",height="200px">
 </div>
 
 
@@ -195,7 +195,7 @@ print(z.get_value())
 You suppose get value 8, at same time shinnosuke construct a graph as below:
 
 <div align=center>
-	<img src="https://github.com/eLeVeNnN/shinnosuke/blob/master/docs/imgs/node_graph.jpg" width="300px",height="300px">
+	<img src="https://github.com/eLeVeNnN/shinnosuke/blob/master/docs/imgs/node_graph.jpg" width="300px",height="200px">
 </div>
 
 
@@ -277,6 +277,7 @@ Then you can install Shinnosuke by using pip:
 #### - Layer:
 
 - Dense
+- Flatten
 - Conv2D
 - MaxPooling2D
 - MeanPooling2D
@@ -289,9 +290,13 @@ Then you can install Shinnosuke by using pip:
 - TimeDistributed
 - SimpleRNN
 - LSTM
+- Embedding
 - GRU (waiting for implemented)
 - ZeroPadding2D
-- **Operations( includes Add, Minus, Multiply, Matmul, and so on basic operations for Layer and Node)**
+- Add
+- Minus
+- Multiply
+- Matmul
 
 
 
