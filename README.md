@@ -22,6 +22,8 @@ Here are some features of Shinnosuke:
 
 Shinnosuke is compatible with: **Python 3.x (3.6 is recommended)**
 
+[-> shinnosuke documents](https://github.com/eLeVeNnN/shinnosuke/blob/master/docs/imgs/Shinnosuke-API.md)
+
 ------
 
 
