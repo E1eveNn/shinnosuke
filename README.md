@@ -22,7 +22,7 @@ Here are some features of Shinnosuke:
 
 Shinnosuke is compatible with: **Python 3.x (3.6 is recommended)**
 
-<div style="background-color: blue" font="bold">------------------------------------------------------ shinnosuke documents -------------------------------------------------------</div>
+`###################################### \^^shinnosuke documents^^/ ######################################`
 
 <div><a href=https://github.com/eLeVeNnN/shinnosuke/blob/master/docs/imgs/Shinnosuke-API.ipynb>Jupyter Notebook</a></div>
 <div><a href=https://github.com/eLeVeNnN/shinnosuke/blob/master/docs/imgs/Shinnosuke-API.md>Markdown</a></div>
@@ -48,8 +48,8 @@ Using `.add()` to connect layers:
 ```python
 from shinnosuke.layers import Dense
 
-m.add(Dense(n_out = 500, activation = 'relu', n_in = 784))  #must be specify n_in if current layer is the first layer of model
-m.add(Dense(n_out = 10, activation = 'softmax'))  #no need to specify n_in as shinnosuke will automatic calculate the input and output shape
+m.add(Dense(n_out=500, activation='relu', n_in=784))  #must be specify n_in if current layer is the first layer of model
+m.add(Dense(n_out=10, activation='softmax'))  #no need to specify n_in as shinnosuke will automatic calculate the input and output shape
 ```
 
 Here are some differences with Keras, n_out and n_in are named units and input_dim in Keras respectively.
@@ -57,7 +57,7 @@ Here are some differences with Keras, n_out and n_in are named units and input_d
 Once you have constructed your model, you should configure it with `.compile()` before training:
 
 ```python
-m.compile(loss = 'sparse_categorical_crossentropy', optimizer = 'sgd')
+m.compile(loss='sparse_categorical_crossentropy', optimizer='sgd')
 ```
 
 If you apply softmax to multi-classify task and your labels are one-hot encoded vectors/matrix, you shall specify loss as  sparse_categorical_crossentropy, otherwise use categorical_crossentropy. (While in Keras categorical_crossentropy supports for one-hot encoded labels). And Shinnosuke model only supports one metrics--**accuracy**, which no need to specify in `compile`.
