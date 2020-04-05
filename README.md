@@ -24,8 +24,12 @@ Shinnosuke is compatible with: **Python 3.x (3.6 is recommended)**
 
 `###################################### \^^shinnosuke documents^^/ ######################################`
 
-<div><a href=https://github.com/eLeVeNnN/shinnosuke/blob/master/docs/imgs/Shinnosuke-API.ipynb>Jupyter Notebook</a></div>
-<div><a href=https://github.com/eLeVeNnN/shinnosuke/blob/master/docs/imgs/Shinnosuke-API.md>Markdown</a></div>
+						    ||
+						    ++
+						     
+<div align=center><a href=https://github.com/eLeVeNnN/shinnosuke/blob/master/docs/imgs/Shinnosuke-API.ipynb>Jupyter Notebook</a></div>
+<div align=center><a href=https://github.com/eLeVeNnN/shinnosuke/blob/master/docs/imgs/Shinnosuke-API.md>Markdown</a></div>
+
 
 ------
 
