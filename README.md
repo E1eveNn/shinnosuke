@@ -21,12 +21,11 @@ Here are some features of Shinnosuke:
 7. **Autograd** is supported .
 
 Shinnosuke is compatible with: **Python 3.x (3.6 is recommended)**
-
-`###################################### \^^shinnosuke documents^^/ ######################################`
-
-						    ||
-						    ++
-						     
+```
+###################################### \^^shinnosuke documents^^/ ######################################
+						    	||
+						    	++	
+```
 <div align=center><a href=https://github.com/eLeVeNnN/shinnosuke/blob/master/docs/imgs/Shinnosuke-API.ipynb>Jupyter Notebook</a></div>
 <div align=center><a href=https://github.com/eLeVeNnN/shinnosuke/blob/master/docs/imgs/Shinnosuke-API.md>Markdown</a></div>
 
